@@ -6,5 +6,6 @@
 #!.platform/*.global.yml
 .git
 env
+.env
 node_modules/
 cmd.sh
