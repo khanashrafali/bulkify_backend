@@ -489,27 +489,35 @@ const changePassword = (req, data) => __awaiter(void 0, void 0, void 0, function
 /**
  * send admin forgot password email
  */
-const sendAdminForgotPasswordEmail = (email) => __awaiter(void 0, void 0, void 0, function* () {
+const sendAdminForgotPasswordEmail = (emailOrMobile) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let conditions = { email };
+        const isMobile = validator_1.default.isMobilePhone(emailOrMobile, "en-IN");
+        let conditions = isMobile ? { mobileNumber: emailOrMobile } : { email: emailOrMobile };
         let user = yield models_1.adminModel.findOne(conditions);
+        let msg = isMobile ? "no admin found with this Mobile number" : "no admin found with this email";
         if (!user)
             throw utils_1.helper.buildError("no admin found with this email", 400);
         const userObj = user.toJSON();
         if (userObj.expirationTime && (0, moment_1.default)(userObj.expirationTime).isAfter((0, moment_1.default)())) {
-            const url = `${process.env.BASE_URL}/admin-reset-password/${userObj.varificationToken}`;
+            // const url = `${process.env.BASE_URL}/admin-reset-password/${userObj.varificationToken}`;
             let leftMinutes = (0, moment_1.default)(userObj.expirationTime)
                 .subtract((0, moment_1.default)().minutes(), "minutes")
                 .minutes();
-            throw utils_1.helper.buildError(`Please enter old otp sent to your mobile, or wait ${leftMinutes} min till old otp expire.`, 200, url);
+            throw utils_1.helper.buildError(`Please enter old otp sent to your email, or wait ${leftMinutes} min till old otp expire.`, 200);
         }
-        const varificationToken = utils_1.helper.getHash();
+        // let randomOTP = randomStr.generate({ length: 4, charset: "0123456789" });
+        // const varificationToken = helper.getHash();
+        const varificationToken = '4321';
         const expirationTime = (0, moment_1.default)().add(1, "hour");
         yield user
             .set({ varificationToken, expirationTime, VerificationType: interfaces_1.VerificationType.ForgotPassword })
             .save();
-        let url = yield utils_1.emailHandler.sentForgotPasswordEmail(userObj.email, varificationToken, "admin-reset-password");
-        return url;
+        // let url = await emailHandler.sentForgotPasswordEmail(
+        //   userObj.email,
+        //   varificationToken,
+        //   "admin-reset-password"
+        // );
+        // return url;
     }
     catch (error) {
         throw error;
@@ -518,9 +526,9 @@ const sendAdminForgotPasswordEmail = (email) => __awaiter(void 0, void 0, void 0
 /**
  * reset admin password
  */
-const resetAdminPassword = (varificationToken, newPassword) => __awaiter(void 0, void 0, void 0, function* () {
+const resetAdminPassword = (varificationToken, newPassword, email) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let admin = yield models_1.adminModel.findOne({ varificationToken });
+        let admin = yield models_1.adminModel.findOne({ varificationToken, email });
         if (!admin)
             throw utils_1.helper.buildError("invalid token", 400);
         let adminObj = admin.toJSON();
@@ -546,22 +554,26 @@ const sendVendorForgotPasswordEmail = (email) => __awaiter(void 0, void 0, void 
         let conditions = { email };
         let user = yield models_1.vendorModel.findOne(conditions);
         if (!user)
-            throw utils_1.helper.buildError("no user found with user email", 400);
+            throw utils_1.helper.buildError("no vendor found with user email", 400);
         const userObj = user.toJSON();
         if (userObj.expirationTime && (0, moment_1.default)(userObj.expirationTime).isAfter((0, moment_1.default)())) {
-            const url = `${process.env.BASE_URL}/vendor-reset-password/${userObj.varificationToken}`;
+            // const url = `${process.env.BASE_URL}/vendor-reset-password/${userObj.varificationToken}`;
             let leftMinutes = (0, moment_1.default)(userObj.expirationTime)
                 .subtract((0, moment_1.default)().minutes(), "minutes")
                 .minutes();
-            throw utils_1.helper.buildError(`Please enter old otp sent to your mobile, or wait ${leftMinutes} min till old otp expire.`, 200, url);
+            throw utils_1.helper.buildError(`Please enter old otp sent to your mobile, or wait ${leftMinutes} min till old otp expire.`, 200);
         }
-        const varificationToken = utils_1.helper.getHash();
+        const varificationToken = '4321';
         const expirationTime = (0, moment_1.default)().add(1, "hour");
         yield user
             .set({ varificationToken, expirationTime, VerificationType: interfaces_1.VerificationType.ForgotPassword })
             .save();
-        let url = yield utils_1.emailHandler.sentForgotPasswordEmail(userObj.email, varificationToken, "vendor-reset-password");
-        return url;
+        // let url = await emailHandler.sentForgotPasswordEmail(
+        //   userObj.email,
+        //   varificationToken,
+        //   "vendor-reset-password"
+        // );
+        // return url;
     }
     catch (error) {
         throw error;
@@ -570,14 +582,14 @@ const sendVendorForgotPasswordEmail = (email) => __awaiter(void 0, void 0, void 
 /**
  * reset vendor password
  */
-const resetVendorPassword = (varificationToken, newPassword) => __awaiter(void 0, void 0, void 0, function* () {
+const resetVendorPassword = (varificationToken, newPassword, email) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let admin = yield models_1.vendorModel.findOne({ varificationToken });
+        let admin = yield models_1.vendorModel.findOne({ varificationToken, email });
         if (!admin)
-            throw utils_1.helper.buildError("invalid token", 400);
+            throw utils_1.helper.buildError("invalid otp", 400);
         let adminObj = admin.toJSON();
         if (adminObj.expirationTime && (0, moment_1.default)(adminObj.expirationTime).isSameOrBefore((0, moment_1.default)()))
-            throw utils_1.helper.buildError("link expired, Please resend again", 400);
+            throw utils_1.helper.buildError("otp expired, Please resend again", 400);
         const isEqual = yield bcryptjs_1.default.compare(newPassword, adminObj.password);
         if (isEqual)
             throw utils_1.helper.buildError("don't use your old password", 400);

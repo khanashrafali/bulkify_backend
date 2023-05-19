@@ -24,14 +24,20 @@ router.post("/vendor-login", validator_1.default.vendorLogin, controllers_1.auth
 router.post("/vendor-signup", validator_1.default.vendorSignup, controllers_1.authCtrl.vendorSignup);
 router.post("/vendor-change-password", isVendorAuth_1.isVendor, validator_1.default.changePassword, controllers_1.authCtrl.vendorChangePassword);
 router.post("/resend-vendor-email", validator_1.default.resendVendorEmail, controllers_1.authCtrl.resendVendorEmail);
+// router.get("/verify-vendor-email/:token", validator.verifyVendorEmail, authCtrl.verifyVendorEmail);
 router.get("/verify-vendor-email/:token", validator_1.default.verifyVendorEmail, controllers_1.authCtrl.verifyVendorEmail);
-router.put("/vendor-reset-password/:token", validator_1.default.putResetAdminPassword, controllers_1.authCtrl.putResetVendorPassword);
+router.put("/vendor-reset-password", validator_1.default.putResetAdminPassword, controllers_1.authCtrl.putResetVendorPassword);
+// router.put(
+//   "/vendor-reset-password/:token",
+//   validator.putResetAdminPassword,
+//   authCtrl.putResetVendorPassword
+// );
 router.post("/vendor-forgot-password-mail", validator_1.default.postSendVendorForgotPasswordMail, controllers_1.authCtrl.postSendVendorForgotPasswordMail);
 // admin auth apis
 router.post("/admin-login", validator_1.default.adminLogin, controllers_1.authCtrl.adminLogin);
 router.post("/admin-signup", validator_1.default.adminSignup, controllers_1.authCtrl.adminSignup);
 router.post("/admin-change-password", isAdminAuth_1.isAdmin, validator_1.default.changePassword, controllers_1.authCtrl.adminChangePassword);
-router.put("/admin-reset-password/:token", validator_1.default.putResetAdminPassword, controllers_1.authCtrl.putResetAdminPassword);
+router.put("/admin-reset-password", validator_1.default.putResetAdminPassword, controllers_1.authCtrl.putResetAdminPassword);
 router.post("/admin-forgot-password-mail", validator_1.default.postSendAdminForgotPasswordMail, controllers_1.authCtrl.postSendAdminForgotPasswordMail);
 router.post("/resend-admin-email", validator_1.default.resendAdminEmail, controllers_1.authCtrl.resendAdminEmail);
 router.get("/verify-admin-email/:token", validator_1.default.verifyAdminEmail, controllers_1.authCtrl.verifyAdminEmail);

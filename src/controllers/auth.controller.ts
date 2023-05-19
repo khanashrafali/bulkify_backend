@@ -241,7 +241,7 @@ const adminChangePassword = async (req: Request, res: Response, next: NextFuncti
 const putResetAdminPassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
     helper.handlePayloadError(req);
-    let result = await authService.resetAdminPassword(req.params.token, req.body.confirmPassword);
+    let result = await authService.resetAdminPassword(req.body.otp, req.body.confirmPassword, req.body.email);
     helper.buildResponse(res, "New password set successfully", result);
   } catch (error) {
     next(error);
@@ -254,7 +254,7 @@ const putResetAdminPassword = async (req: Request, res: Response, next: NextFunc
 const putResetVendorPassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
     helper.handlePayloadError(req);
-    let result = await authService.resetVendorPassword(req.params.token, req.body.confirmPassword);
+    let result = await authService.resetVendorPassword(req.body.otp, req.body.confirmPassword, req.body.email);
     helper.buildResponse(res, "New password set successfully", result);
   } catch (error) {
     next(error);

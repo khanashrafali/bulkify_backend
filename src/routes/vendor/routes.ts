@@ -15,8 +15,8 @@ router.post(
   isUser,
   fileHandler.uploadProductFilesToS3("vendors").fields([
     { name: "avatar", maxCount: 1 },
-    { name: "images", maxCount: 5 },
-    { name: "video", maxCount: 1 },
+    // { name: "images", maxCount: 5 },
+    // { name: "video", maxCount: 1 },
   ]),
   validator.becameAVendor,
   vendorCtrl.becameAVendor
@@ -39,8 +39,8 @@ router.post(
   isAdmin,
   fileHandler.uploadProductFilesToS3("vendors").fields([
     { name: "avatar", maxCount: 1 },
-    { name: "images", maxCount: 5 },
-    { name: "video", maxCount: 1 },
+    // { name: "images", maxCount: 5 },
+    // { name: "video", maxCount: 1 },
   ]),
   validator.addVendor,
   vendorCtrl.addVendor

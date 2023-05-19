@@ -22,7 +22,7 @@ utils_1.helper.loadEnvFile();
  */
 const addVendor = (req, body, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield models_1.userModel.findOne({ mobileNumber: body.mobileNumber });
+        const user = yield models_1.vendorModel.findOne({ $or: [{ mobileNumber: body.mobileNumber }, { email: body.email }] });
         if (user)
             throw utils_1.helper.buildError("This mobile number or email already in use", 400);
         const randomPassword = randomstring_1.default.generate({ length: 8 });
@@ -31,7 +31,7 @@ const addVendor = (req, body, res) => __awaiter(void 0, void 0, void 0, function
         yield models_1.vendorModel.create(data);
         utils_1.helper.buildResponse(res, "Vendor registered successfully");
         // await emailHandler.sentVendorInvitationMail(body.businessEmail, body.name);
-        yield utils_1.emailHandler.sentVendorInvitationMail(body.name, body.email, randomPassword);
+        // await emailHandler.sentVendorInvitationMail(body.name, body.email, randomPassword);
     }
     catch (error) {
         throw error;

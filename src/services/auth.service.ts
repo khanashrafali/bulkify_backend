@@ -532,38 +532,41 @@ const changePassword = async (req: IRequest, data: any) => {
 /**
  * send admin forgot password email
  */
-const sendAdminForgotPasswordEmail = async (email: string) => {
+const sendAdminForgotPasswordEmail = async (emailOrMobile: string) => {
   try {
-    let conditions = { email };
+    const isMobile = validator.isMobilePhone(emailOrMobile, "en-IN");
+    let conditions = isMobile ? { mobileNumber: emailOrMobile } : { email: emailOrMobile };
     let user = await adminModel.findOne(conditions);
+    let msg = isMobile ? "no admin found with this Mobile number" : "no admin found with this email";
     if (!user) throw helper.buildError("no admin found with this email", 400);
 
     const userObj: any = user.toJSON();
 
     if (userObj.expirationTime && moment(userObj.expirationTime).isAfter(moment())) {
-      const url = `${process.env.BASE_URL}/admin-reset-password/${userObj.varificationToken}`;
+      // const url = `${process.env.BASE_URL}/admin-reset-password/${userObj.varificationToken}`;
       let leftMinutes = moment(userObj.expirationTime)
         .subtract(moment().minutes(), "minutes")
         .minutes();
       throw helper.buildError(
-        `Please enter old otp sent to your mobile, or wait ${leftMinutes} min till old otp expire.`,
+        `Please enter old otp sent to your email, or wait ${leftMinutes} min till old otp expire.`,
         200,
-        url
       );
     }
+    // let randomOTP = randomStr.generate({ length: 4, charset: "0123456789" });
 
-    const varificationToken = helper.getHash();
+    // const varificationToken = helper.getHash();
+    const varificationToken = '4321'
     const expirationTime = moment().add(1, "hour");
 
     await user
       .set({ varificationToken, expirationTime, VerificationType: VerificationType.ForgotPassword })
       .save();
-    let url = await emailHandler.sentForgotPasswordEmail(
-      userObj.email,
-      varificationToken,
-      "admin-reset-password"
-    );
-    return url;
+    // let url = await emailHandler.sentForgotPasswordEmail(
+    //   userObj.email,
+    //   varificationToken,
+    //   "admin-reset-password"
+    // );
+    // return url;
   } catch (error) {
     throw error;
   }
@@ -572,9 +575,9 @@ const sendAdminForgotPasswordEmail = async (email: string) => {
 /**
  * reset admin password
  */
-const resetAdminPassword = async (varificationToken: string, newPassword: string) => {
+const resetAdminPassword = async (varificationToken: string, newPassword: string, email:string) => {
   try {
-    let admin = await adminModel.findOne({ varificationToken });
+    let admin = await adminModel.findOne({ varificationToken, email });
 
     if (!admin) throw helper.buildError("invalid token", 400);
 
@@ -604,34 +607,33 @@ const sendVendorForgotPasswordEmail = async (email: string) => {
   try {
     let conditions = { email };
     let user = await vendorModel.findOne(conditions);
-    if (!user) throw helper.buildError("no user found with user email", 400);
+    if (!user) throw helper.buildError("no vendor found with user email", 400);
 
     const userObj: any = user.toJSON();
 
     if (userObj.expirationTime && moment(userObj.expirationTime).isAfter(moment())) {
-      const url = `${process.env.BASE_URL}/vendor-reset-password/${userObj.varificationToken}`;
+      // const url = `${process.env.BASE_URL}/vendor-reset-password/${userObj.varificationToken}`;
       let leftMinutes = moment(userObj.expirationTime)
         .subtract(moment().minutes(), "minutes")
         .minutes();
       throw helper.buildError(
         `Please enter old otp sent to your mobile, or wait ${leftMinutes} min till old otp expire.`,
-        200,
-        url
+        200
       );
     }
 
-    const varificationToken = helper.getHash();
+    const varificationToken = '4321';
     const expirationTime = moment().add(1, "hour");
 
     await user
       .set({ varificationToken, expirationTime, VerificationType: VerificationType.ForgotPassword })
       .save();
-    let url = await emailHandler.sentForgotPasswordEmail(
-      userObj.email,
-      varificationToken,
-      "vendor-reset-password"
-    );
-    return url;
+    // let url = await emailHandler.sentForgotPasswordEmail(
+    //   userObj.email,
+    //   varificationToken,
+    //   "vendor-reset-password"
+    // );
+    // return url;
   } catch (error) {
     throw error;
   }
@@ -640,16 +642,16 @@ const sendVendorForgotPasswordEmail = async (email: string) => {
 /**
  * reset vendor password
  */
-const resetVendorPassword = async (varificationToken: string, newPassword: string) => {
+const resetVendorPassword = async (varificationToken: string, newPassword: string, email:string) => {
   try {
-    let admin = await vendorModel.findOne({ varificationToken });
+    let admin = await vendorModel.findOne({ varificationToken,email });
 
-    if (!admin) throw helper.buildError("invalid token", 400);
+    if (!admin) throw helper.buildError("invalid otp", 400);
 
     let adminObj: any = admin.toJSON();
 
     if (adminObj.expirationTime && moment(adminObj.expirationTime).isSameOrBefore(moment()))
-      throw helper.buildError("link expired, Please resend again", 400);
+      throw helper.buildError("otp expired, Please resend again", 400);
 
     const isEqual = await bcrypt.compare(newPassword, adminObj.password);
 

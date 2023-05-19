@@ -115,9 +115,9 @@ const postReplacePassword = [
     }),
 ];
 
-const putResetAdminPassword = [param("token", "Please enter valid token").exists().trim().notEmpty(), ...postReplacePassword];
+const putResetAdminPassword = [body("otp", "Please enter valid otp").exists().trim().notEmpty(), ...postReplacePassword];
 const postSendAdminForgotPasswordMail = [...resendAdminEmail];
-const putResetVendorPassword = [param("token", "Please enter valid token").exists().trim().notEmpty(), ...postReplacePassword];
+const putResetVendorPassword = [body("otp", "Please enter valid token").exists().trim().notEmpty(), ...postReplacePassword];
 const postSendVendorForgotPasswordMail = [...resendAdminEmail];
 
 export default {

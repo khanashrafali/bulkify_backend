@@ -238,7 +238,7 @@ const adminChangePassword = (req, res, next) => __awaiter(void 0, void 0, void 0
 const putResetAdminPassword = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         utils_1.helper.handlePayloadError(req);
-        let result = yield services_1.authService.resetAdminPassword(req.params.token, req.body.confirmPassword);
+        let result = yield services_1.authService.resetAdminPassword(req.body.otp, req.body.confirmPassword, req.body.email);
         utils_1.helper.buildResponse(res, "New password set successfully", result);
     }
     catch (error) {
@@ -251,7 +251,7 @@ const putResetAdminPassword = (req, res, next) => __awaiter(void 0, void 0, void
 const putResetVendorPassword = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         utils_1.helper.handlePayloadError(req);
-        let result = yield services_1.authService.resetVendorPassword(req.params.token, req.body.confirmPassword);
+        let result = yield services_1.authService.resetVendorPassword(req.body.otp, req.body.confirmPassword, req.body.email);
         utils_1.helper.buildResponse(res, "New password set successfully", result);
     }
     catch (error) {

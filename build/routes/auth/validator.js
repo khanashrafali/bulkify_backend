@@ -99,9 +99,9 @@ const postReplacePassword = [
             throw utils_1.helper.buildError("must match new Password and confirm password", 400);
     })),
 ];
-const putResetAdminPassword = [(0, express_validator_1.param)("token", "Please enter valid token").exists().trim().notEmpty(), ...postReplacePassword];
+const putResetAdminPassword = [(0, express_validator_1.body)("otp", "Please enter valid otp").exists().trim().notEmpty(), ...postReplacePassword];
 const postSendAdminForgotPasswordMail = [...resendAdminEmail];
-const putResetVendorPassword = [(0, express_validator_1.param)("token", "Please enter valid token").exists().trim().notEmpty(), ...postReplacePassword];
+const putResetVendorPassword = [(0, express_validator_1.body)("otp", "Please enter valid token").exists().trim().notEmpty(), ...postReplacePassword];
 const postSendVendorForgotPasswordMail = [...resendAdminEmail];
 exports.default = {
     userLogin,

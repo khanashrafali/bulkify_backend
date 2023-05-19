@@ -15,7 +15,7 @@ helper.loadEnvFile();
  */
 const addVendor = async (req: IRequest, body: any, res: Response) => {
   try {
-    const user = await userModel.findOne({ mobileNumber: body.mobileNumber });
+    const user = await vendorModel.findOne({$or: [{mobileNumber: body.mobileNumber},{email:body.email}] });
     if (user) throw helper.buildError("This mobile number or email already in use", 400);
 
     const randomPassword = randomStr.generate({ length: 8 });
@@ -31,7 +31,7 @@ const addVendor = async (req: IRequest, body: any, res: Response) => {
     await vendorModel.create(data);
     helper.buildResponse(res, "Vendor registered successfully");
     // await emailHandler.sentVendorInvitationMail(body.businessEmail, body.name);
-    await emailHandler.sentVendorInvitationMail(body.name, body.email, randomPassword);
+    // await emailHandler.sentVendorInvitationMail(body.name, body.email, randomPassword);
   } catch (error) {
     throw error;
   }

@@ -15,8 +15,8 @@ const validator_1 = __importDefault(require("./validator"));
 const router = (0, express_1.Router)();
 router.post("/became-a-vendor", isUserAuth_1.isUser, utils_1.fileHandler.uploadProductFilesToS3("vendors").fields([
     { name: "avatar", maxCount: 1 },
-    { name: "images", maxCount: 5 },
-    { name: "video", maxCount: 1 },
+    // { name: "images", maxCount: 5 },
+    // { name: "video", maxCount: 1 },
 ]), validator_1.default.becameAVendor, controllers_1.vendorCtrl.becameAVendor);
 router.post("/complete-profile", isVendorAuth_1.isVendor, utils_1.fileHandler.uploadProductFilesToS3("vendors").fields([
     { name: "avatar", maxCount: 1 },
@@ -25,8 +25,8 @@ router.post("/complete-profile", isVendorAuth_1.isVendor, utils_1.fileHandler.up
 ]), validator_1.default.completeVendorProfile, controllers_1.vendorCtrl.completeVendorProfile);
 router.post("/", isAdminAuth_1.isAdmin, utils_1.fileHandler.uploadProductFilesToS3("vendors").fields([
     { name: "avatar", maxCount: 1 },
-    { name: "images", maxCount: 5 },
-    { name: "video", maxCount: 1 },
+    // { name: "images", maxCount: 5 },
+    // { name: "video", maxCount: 1 },
 ]), validator_1.default.addVendor, controllers_1.vendorCtrl.addVendor);
 router.put("/:vendorId", isAdminAuth_1.isAdmin, validator_1.default.updateVendor, controllers_1.vendorCtrl.updateVendor);
 router.put("/:vendorId/update-profile", isVendorAuth_1.isVendor, validator_1.default.updateVendorProfile, controllers_1.vendorCtrl.updateVendorProfile);

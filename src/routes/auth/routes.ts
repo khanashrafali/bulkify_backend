@@ -34,12 +34,18 @@ router.post(
 );
 
 router.post("/resend-vendor-email", validator.resendVendorEmail, authCtrl.resendVendorEmail);
+// router.get("/verify-vendor-email/:token", validator.verifyVendorEmail, authCtrl.verifyVendorEmail);
 router.get("/verify-vendor-email/:token", validator.verifyVendorEmail, authCtrl.verifyVendorEmail);
 router.put(
-  "/vendor-reset-password/:token",
+  "/vendor-reset-password",
   validator.putResetAdminPassword,
   authCtrl.putResetVendorPassword
 );
+// router.put(
+//   "/vendor-reset-password/:token",
+//   validator.putResetAdminPassword,
+//   authCtrl.putResetVendorPassword
+// );
 router.post(
   "/vendor-forgot-password-mail",
   validator.postSendVendorForgotPasswordMail,
@@ -56,7 +62,7 @@ router.post(
   authCtrl.adminChangePassword
 );
 router.put(
-  "/admin-reset-password/:token",
+  "/admin-reset-password",
   validator.putResetAdminPassword,
   authCtrl.putResetAdminPassword
 );
