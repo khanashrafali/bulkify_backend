@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AdminModule = exports.PriceDecisionFactor = exports.VerificationType = exports.ImageType = exports.HomeProduct = exports.Language = exports.PaymentMethod = exports.OrderStatus = exports.PaymentStatus = exports.ProductType = exports.Gender = exports.ApprovalStatus = exports.UserRole = void 0;
+exports.AdminModule = exports.PriceDecisionFactor = exports.VerificationType = exports.ImageType = exports.HomeProduct = exports.Language = exports.PaymentMethod = exports.OrderStatus = exports.PaymentStatus = exports.ProductType = exports.Gender = exports.ApprovalStatus = exports.AdminProjection = exports.UserRole = void 0;
 var UserRole;
 (function (UserRole) {
     UserRole["SUPER_ADMIN"] = "SUPER_ADMIN";
@@ -8,6 +8,18 @@ var UserRole;
     UserRole["USER"] = "USER";
     UserRole["VENDOR"] = "VENDOR";
 })(UserRole = exports.UserRole || (exports.UserRole = {}));
+var AdminProjection;
+(function (AdminProjection) {
+    AdminProjection[AdminProjection["_id"] = 1] = "_id";
+    AdminProjection[AdminProjection["firstName"] = 1] = "firstName";
+    AdminProjection[AdminProjection["lastName"] = 1] = "lastName";
+    AdminProjection[AdminProjection["email"] = 1] = "email";
+    AdminProjection[AdminProjection["mobileNumber"] = 1] = "mobileNumber";
+    AdminProjection[AdminProjection["avatar"] = 1] = "avatar";
+    AdminProjection[AdminProjection["isActive"] = 1] = "isActive";
+    AdminProjection[AdminProjection["userRole"] = 1] = "userRole";
+    AdminProjection[AdminProjection["isEmailVerified"] = 1] = "isEmailVerified";
+})(AdminProjection = exports.AdminProjection || (exports.AdminProjection = {}));
 var ApprovalStatus;
 (function (ApprovalStatus) {
     ApprovalStatus["PENDING"] = "PENDING";

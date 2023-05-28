@@ -129,6 +129,21 @@ const patchUpdateApproval = (req, res, next) => __awaiter(void 0, void 0, void 0
     }
 });
 /**
+ * complete vendor KYC
+ */
+const completeVendorKyc = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        utils_1.helper.handlePayloadError(req);
+        utils_1.helper.checkPayloadFiles(req);
+        const fileObj = req.files;
+        const result = yield services_1.vendorService.completeVendorKyc(req, req.body, fileObj, res);
+        utils_1.helper.buildResponse(res, 'KYC completed successfully', result);
+    }
+    catch (error) {
+        next(error);
+    }
+});
+/**
  * complete vendor profile api
  */
 const completeVendorProfile = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -176,4 +191,5 @@ exports.default = {
     becameAVendor,
     updateVendorProfile,
     generateNewPassword,
+    completeVendorKyc,
 };

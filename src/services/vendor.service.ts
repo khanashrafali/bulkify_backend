@@ -3,9 +3,9 @@ import validator from "validator";
 import { Response } from "express";
 import randomStr from "randomstring";
 import { shiprocketService } from ".";
-import { userModel, vendorModel } from "../models";
+import { userModel, vendorKYCModel, vendorModel } from "../models";
 import { CONSTANT, emailHandler, fileHandler, helper } from "../utils";
-import { IRequest } from "../utils/interfaces";
+import { IRequest, UserRole } from "../utils/interfaces";
 import moment from "moment";
 
 helper.loadEnvFile();
@@ -118,17 +118,18 @@ const getVendors = async (queryParams: any) => {
  */
 const getVendorsByAdmin = async (queryParams: any) => {
   try {
-    let conditions: any = {};
+    let conditions: any = {role: UserRole.VENDOR};
     let { textSearch, isProfileComplete, isActive, createdAt, isApproved } = queryParams;
     const pageInfo = helper.checkPagination(queryParams);
 
     if (textSearch) {
       conditions["$or"] = [
-        { name: { $regex: helper.regxEscape(textSearch), $options: "i" } },
+        { firstName: { $regex: helper.regxEscape(textSearch), $options: "i" } },
+        { lastName: { $regex: helper.regxEscape(textSearch), $options: "i" } },
         { email: { $regex: helper.regxEscape(textSearch), $options: "i" } },
         { mobileNumber: { $regex: helper.regxEscape(textSearch), $options: "i" } },
-        { businessEmail: { $regex: helper.regxEscape(textSearch), $options: "i" } },
-        { businessName: { $regex: helper.regxEscape(textSearch), $options: "i" } },
+        { companyName: { $regex: helper.regxEscape(textSearch), $options: "i" } },
+        { country: { $regex: helper.regxEscape(textSearch), $options: "i" } },
       ];
     }
     if (isProfileComplete) conditions.isProfileComplete = isProfileComplete;
@@ -137,8 +138,8 @@ const getVendorsByAdmin = async (queryParams: any) => {
     if (isApproved) conditions.isApproved = isApproved;
 
     let docs = [];
-    let mongoQuery = vendorModel.find(conditions).sort({ createdAt: -1 });
-    const count = await vendorModel.countDocuments(conditions);
+    let mongoQuery = userModel.find(conditions).sort({ createdAt: -1 });
+    const count = await userModel.countDocuments(conditions);
 
     if (pageInfo) docs = await mongoQuery.skip(pageInfo.skip).limit(pageInfo.pageSize);
     else docs = await mongoQuery;
@@ -174,6 +175,31 @@ const updateVendorApproval = async (vendorId: string, isApproved: string) => {
     throw error;
   }
 };
+
+/**
+ * complete vendor KYC
+ */
+
+const completeVendorKyc = async (req: IRequest, body: any, fileObj: any, res: Response) => {
+  try {
+    let gstCertificate = fileObj.gstCertificate.map((f:any) => f.Location);
+    let panAvatar = fileObj.panAvatar.map((f:any) => f.Location);
+    let coiAvatar = fileObj.coiAvatar.map((f:any) => f.Location);
+    
+    let kycData = {
+      ...body,
+      gstCertificate,
+      panAvatar,
+      coiAvatar,
+      vendor: req.user._id
+    }
+
+    await vendorKYCModel.create(kycData);
+    await req.user.set({isVendorKycComplete: true}).save();
+  } catch (error) {
+    throw error;
+  }
+}
 
 /**
  * complete vender profile handler
@@ -287,4 +313,5 @@ export default {
   updateVendorApproval,
   becameAVendor,
   generateNewPassword,
+  completeVendorKyc,
 };

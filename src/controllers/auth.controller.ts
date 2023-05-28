@@ -97,9 +97,7 @@ const adminSignup = async (req: Request, res: Response, next: NextFunction) => {
   try {
     helper.handlePayloadError(req);
     let result = await authService.adminSignup(
-      req.body.email,
-      req.body.password,
-      req.body.confirmPassword
+      req.body
     );
     helper.buildResponse(res, "Please verify email to registered successfully", result);
   } catch (error) {
@@ -113,7 +111,7 @@ const adminSignup = async (req: Request, res: Response, next: NextFunction) => {
 const verifyAdminEmail = async (req: Request, res: Response, next: NextFunction) => {
   try {
     helper.handlePayloadError(req);
-    let result = await authService.verifyAdminEmail(req.params.token);
+    let result = await authService.verifyEmail(req.body.token, req.body.email);
     helper.buildResponse(res, "Email Verified Successfully!", result);
   } catch (error) {
     next(error);
@@ -165,9 +163,7 @@ const vendorSignup = async (req: Request, res: Response, next: NextFunction) => 
   try {
     helper.handlePayloadError(req);
     let result = await authService.vendorSignup(
-      req.body.email,
-      req.body.password,
-      req.body.confirmPassword
+      req.body
     );
     helper.buildResponse(res, "Please verify email to registered successfully", result);
   } catch (error) {
@@ -181,7 +177,7 @@ const vendorSignup = async (req: Request, res: Response, next: NextFunction) => 
 const verifyVendorEmail = async (req: Request, res: Response, next: NextFunction) => {
   try {
     helper.handlePayloadError(req);
-    let result = await authService.verifyVendorEmail(req.params.token);
+    let result = await authService.verifyEmail(req.body.token, req.body.email);
     helper.buildResponse(res, "Email Verified Successfully!", result);
   } catch (error) {
     next(error);

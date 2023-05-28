@@ -29,6 +29,7 @@ import queriesModel from "./queries.model";
 import notificationModel from "./notification.model";
 import dynamicModel from "./dynamic-heading.model";
 import shipChargeModel from "./ship-charge.model";
+import vendorKYCModel from "./vendorKYC.model";
 
 export {
   userModel,
@@ -62,4 +63,5 @@ export {
   notificationModel,
   dynamicModel,
   shipChargeModel,
+  vendorKYCModel,
 };

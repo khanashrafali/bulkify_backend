@@ -52,6 +52,12 @@ const becameAVendor = [
 
 const completeVendorProfile: any[] = [...becameAVendor];
 
+const completeVendorKyc = [
+  body("gstNumber", "Please enter valid gstNumber").exists().trim().notEmpty(),
+  body("panNumber", "Please eneter valid panNumber").exists().trim().notEmpty(),
+  body("cinNumber", "Please enter valid cinNumber").exists().trim().notEmpty(),  
+]
+
 const addVendor: any[] = [...becameAVendor];
 
 const updateVendor: any[] = [
@@ -131,4 +137,5 @@ export default {
   updateVendorStatus,
   patchUpdateApproval,
   updateVendorProfile,
+  completeVendorKyc,
 };

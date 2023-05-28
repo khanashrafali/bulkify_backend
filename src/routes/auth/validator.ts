@@ -1,5 +1,7 @@
-import { body, oneOf, param, query } from "express-validator";
+import { CustomValidator, body, oneOf, param, query } from "express-validator";
 import { CONSTANT, helper } from "../../utils";
+import { categoryModel } from "../../models";
+import { UserRole } from "../../utils/interfaces";
 
 const userLogin: any[] = [
   oneOf(
@@ -10,6 +12,11 @@ const userLogin: any[] = [
     "Please enter valid mobile number or email id"
   ),
 ];
+
+const checkCategory: CustomValidator = async (val, { req }) => {
+  let category = await categoryModel.findOne({ _id: val });
+  if (!category) throw helper.buildError("No category found with this id", 404);
+};
 
 const userSignup: any[] = [
   body("name", "Please enter valid name")
@@ -33,6 +40,12 @@ const vendorSignup: any[] = [
     .trim()
     .notEmpty()
     .matches(CONSTANT.REGX.Password),
+  body('firstName', "Please enter valid first name").exists().trim().notEmpty(),
+  body('lastName', "Please enter valid last name").exists().trim().notEmpty(),
+  body('mobileNumber', "Please enter valid mobile number").exists().trim().notEmpty(),
+  body('companyName', "Please enter valid company name").exists().trim().notEmpty(),
+  body('country', "Please enter valid country").exists().trim().notEmpty(),
+  // body('categoryForBusiness', "Please select valid category").exists().trim().notEmpty().custom(checkCategory),
 ];
 
 const resendOtp = [
@@ -63,15 +76,25 @@ const adminSignup = [
     .trim()
     .notEmpty()
     .matches(CONSTANT.REGX.Password),
+  body('firstName', "Please enter valid first name").exists().trim().notEmpty(),
+  body('lastName', "Please enter valid last name").exists().trim().notEmpty(),
+  body('mobileNumber', "Please enter valid mobile number").exists().trim().notEmpty(),
+  body("role", "Please select valid role").exists().trim().notEmpty().isIn([UserRole.SUPER_ADMIN, UserRole.ADMIN])
 ];
 
 const resendAdminEmail = [body("email", "Please enter valid email").exists().trim().notEmpty().isEmail().normalizeEmail()];
 
-const verifyAdminEmail = [param("token", "Please enter valid token").exists().trim().notEmpty()];
+const verifyAdminEmail = [
+  body("token", "Please enter valid token").exists().trim().notEmpty(),
+  body("email","Please enter valid email").exists().trim().notEmpty().isEmail().normalizeEmail()
+];
 
 const resendVendorEmail = [body("email", "Please enter valid email").exists().trim().notEmpty().isEmail().normalizeEmail()];
 
-const verifyVendorEmail = [param("token", "Please enter valid token").exists().trim().notEmpty()];
+const verifyVendorEmail = [
+  body("token", "Please enter valid token").exists().trim().notEmpty(),
+  body("email","Please enter valid email").exists().trim().notEmpty().isEmail().normalizeEmail()
+];
 
 const adminLogin = [
   body("email", "Please enter valid email").exists().trim().notEmpty().isEmail().normalizeEmail(),

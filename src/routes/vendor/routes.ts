@@ -34,6 +34,12 @@ router.post(
   vendorCtrl.completeVendorProfile
 );
 
+router.post("/complete-vendor-kyc", isVendor, fileHandler.uploadProductFilesToS3("vendors").fields([
+  { name: "gstCertificate", maxCount: 2 },
+  { name: "panAvatar", maxCount: 2 },
+  { name: "coiAvatar", maxCount: 2 }
+]), validator.completeVendorKyc, vendorCtrl.completeVendorKyc)
+
 router.post(
   "/",
   isAdmin,

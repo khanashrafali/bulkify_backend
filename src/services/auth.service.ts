@@ -5,7 +5,7 @@ import validator from "validator";
 import randomStr from "randomstring";
 import { userModel, vendorModel, adminModel } from "../models";
 import { emailHandler, helper, otpHandler } from "../utils";
-import { ApprovalStatus, IRequest, UserRole, VerificationType } from "../utils/interfaces";
+import { ApprovalStatus, IRequest, UserRole, VerificationType, AdminProjection } from "../utils/interfaces";
 import { Response } from "express";
 
 helper.loadEnvFile();
@@ -253,7 +253,7 @@ const resendOtp = async (emailOrMobile: string) => {
  */
 const adminLogin = async (email: string, password: string) => {
   try {
-    const user = await adminModel.findOne({ email }).populate("adminRole");
+    const user = await userModel.findOne({ email }, AdminProjection);
     // if (!user) throw helper.buildError("No admin found with this email", 404);
     if (!user) throw helper.buildError("Invalid email or password.", 404);
     const userToJson: any = user.toJSON();
@@ -264,6 +264,7 @@ const adminLogin = async (email: string, password: string) => {
         400
       );
     }
+    if(userToJson.role == UserRole.ADMIN && !userToJson.isEmailVerified) throw helper.buildError('Please verify email to login successfully', 400)
 
     const isValidPassword = await bcrypt.compare(password, userToJson.password);
     if (!isValidPassword) throw helper.buildError("Invalid email or password.", 400);
@@ -277,15 +278,15 @@ const adminLogin = async (email: string, password: string) => {
 /**
  * admin signup handler
  */
-const adminSignup = async (email: string, password: string, confirmPassword: string) => {
+const adminSignup = async (body: any) => {
   let newUser;
   try {
-    if (confirmPassword != password)
+    if (body?.confirmPassword != body?.password)
       throw helper.buildError("Password and confirm must be same", 400);
-    let superAdmin = await adminModel.findOne({ role: UserRole.SUPER_ADMIN });
+    // let superAdmin = await userModel.findOne({ email: body.email, role: body.userRole });
+    const user = await userModel.findOne({ email: body.email });
 
-    if (superAdmin) throw helper.buildError("Super admin already exists.", 401);
-    const user = await adminModel.findOne({ email });
+    // if (user) throw helper.buildError(`${body.role==UserRole.SUPER_ADMIN ? 'Super admin' : 'Admin'} already exists.`, 401);
 
     if (user) {
       const userToJson: any = user.toJSON();
@@ -298,19 +299,24 @@ const adminSignup = async (email: string, password: string, confirmPassword: str
     }
 
     // const varificationToken = randomStr.generate({ charset: "numeric", length: 4 });
-    const varificationToken = helper.getHash();
+    const varificationToken = '4321';
     const expirationTime = moment(moment()).add(5, "minutes");
-    const hashPassword = await bcrypt.hash(password, 12);
+    const hashPassword = await bcrypt.hash(body.password, 12);
     const userData = {
-      email,
+      ...body,
       password: hashPassword,
-      varificationToken,
-      expirationTime,
-      role: UserRole.SUPER_ADMIN,
+      varificationToken: body.role==UserRole.ADMIN ? varificationToken : null,
+      expirationTime: body.role==UserRole.ADMIN ? expirationTime : null,
+      // role: UserRole.SUPER_ADMIN,
       isActive: true,
     };
+    if(body.role==UserRole.SUPER_ADMIN) {
+      userData.isApproved = ApprovalStatus.APPROVED;
+      // userData.isActive = true;
+      userData.isEmailVerified = true
+    }
 
-    if (!user) newUser = await adminModel.create(userData);
+    if (!user) newUser = await userModel.create(userData);
     else newUser = await user.set(userData).save();
 
     // send email
@@ -319,7 +325,7 @@ const adminSignup = async (email: string, password: string, confirmPassword: str
     //   `From ${varificationToken} Webmobril`
     // );
 
-    return { url: `${process.env.BASE_URL}/api/v1/auth/verify-admin-email/${varificationToken}` };
+    // return { url: `${process.env.BASE_URL}/api/v1/auth/verify-admin-email/${varificationToken}` };
   } catch (error) {
     if (newUser) await newUser.remove();
     throw error;
@@ -331,7 +337,7 @@ const adminSignup = async (email: string, password: string, confirmPassword: str
  */
 const vendorLogin = async (email: string, password: string) => {
   try {
-    const user = await vendorModel.findOne({ email });
+    const user = await userModel.findOne({ email });
     if (!user) throw helper.buildError("No vendor found with this email", 404);
     const userToJson: any = user.toJSON();
 
@@ -351,12 +357,12 @@ const vendorLogin = async (email: string, password: string) => {
 /**
  * vendor signup handler
  */
-const vendorSignup = async (email: string, password: string, confirmPassword: string) => {
+const vendorSignup = async (body: any) => {
   let newUser;
   try {
-    if (confirmPassword != password)
+    if (body?.confirmPassword != body?.password)
       throw helper.buildError("Password and confirm must be same", 400);
-    const user = await vendorModel.findOne({ email });
+    const user = await userModel.findOne({ email: body.email });
 
     if (user) {
       const userToJson: any = user.toJSON();
@@ -369,18 +375,19 @@ const vendorSignup = async (email: string, password: string, confirmPassword: st
     }
 
     // const varificationToken = randomStr.generate({ charset: "numeric", length: 4 });
-    const varificationToken = helper.getHash();
+    const varificationToken = '4321';
     const expirationTime = moment(moment()).add(5, "minutes");
-    const hashPassword = await bcrypt.hash(password, 12);
+    const hashPassword = await bcrypt.hash(body.password, 12);
     const userData = {
-      email,
+      ...body,
       password: hashPassword,
       varificationToken,
       expirationTime,
+      role: UserRole.VENDOR,
       // role: UserRole.SUPER_ADMIN,
     };
 
-    if (!user) newUser = await vendorModel.create(userData);
+    if (!user) newUser = await userModel.create(userData);
     else newUser = await user.set(userData).save();
 
     // send email
@@ -389,7 +396,7 @@ const vendorSignup = async (email: string, password: string, confirmPassword: st
     //   `From ${varificationToken} Webmobril`
     // );
 
-    return { url: `${process.env.BASE_URL}/api/v1/auth/verify-vendor-email/${varificationToken}` };
+    // return { url: `${process.env.BASE_URL}/api/v1/auth/verify-vendor-email/${varificationToken}` };
   } catch (error) {
     if (newUser) await newUser.remove();
     throw error;
@@ -399,17 +406,17 @@ const vendorSignup = async (email: string, password: string, confirmPassword: st
 /**
  * verify admin email handler
  */
-const verifyAdminEmail = async (varificationToken: string) => {
+const verifyEmail = async (varificationToken: string, email: string) => {
   try {
-    const user = await adminModel.findOne({ varificationToken });
+    const user = await userModel.findOne({ varificationToken, email });
     if (!user) throw helper.buildError("Please enter valid varification token", 400);
     const userToJson: any = user.toJSON();
 
     if (userToJson.expirationTime && moment(userToJson.expirationTime).isBefore(moment()))
-      throw helper.buildError("Link expired", 400);
+      throw helper.buildError("OTP expired", 400);
 
     let data: any = { varificationToken: null, expirationTime: null, isEmailVerified: true };
-    if (userToJson.role == UserRole.SUPER_ADMIN) data.isApproved = ApprovalStatus.APPROVED;
+    // if (userToJson.role == UserRole.SUPER_ADMIN) data.isApproved = ApprovalStatus.APPROVED;
     await user.set(data).save();
   } catch (error) {
     throw error;
@@ -536,9 +543,9 @@ const sendAdminForgotPasswordEmail = async (emailOrMobile: string) => {
   try {
     const isMobile = validator.isMobilePhone(emailOrMobile, "en-IN");
     let conditions = isMobile ? { mobileNumber: emailOrMobile } : { email: emailOrMobile };
-    let user = await adminModel.findOne(conditions);
+    let user = await userModel.findOne(conditions);
     let msg = isMobile ? "no admin found with this Mobile number" : "no admin found with this email";
-    if (!user) throw helper.buildError("no admin found with this email", 400);
+    if (!user) throw helper.buildError(msg, 400);
 
     const userObj: any = user.toJSON();
 
@@ -577,7 +584,7 @@ const sendAdminForgotPasswordEmail = async (emailOrMobile: string) => {
  */
 const resetAdminPassword = async (varificationToken: string, newPassword: string, email:string) => {
   try {
-    let admin = await adminModel.findOne({ varificationToken, email });
+    let admin = await userModel.findOne({ varificationToken, email });
 
     if (!admin) throw helper.buildError("invalid token", 400);
 
@@ -617,7 +624,7 @@ const sendVendorForgotPasswordEmail = async (email: string) => {
         .subtract(moment().minutes(), "minutes")
         .minutes();
       throw helper.buildError(
-        `Please enter old otp sent to your mobile, or wait ${leftMinutes} min till old otp expire.`,
+        `Please enter old otp sent to your email, or wait ${leftMinutes} min till old otp expire.`,
         200
       );
     }
@@ -644,7 +651,7 @@ const sendVendorForgotPasswordEmail = async (email: string) => {
  */
 const resetVendorPassword = async (varificationToken: string, newPassword: string, email:string) => {
   try {
-    let admin = await vendorModel.findOne({ varificationToken,email });
+    let admin = await userModel.findOne({ varificationToken,email });
 
     if (!admin) throw helper.buildError("invalid otp", 400);
 
@@ -678,7 +685,7 @@ export default {
   vendorLogin,
   vendorSignup,
   verifyAuthToken,
-  verifyAdminEmail,
+  verifyEmail,
   resendAdminEmail,
   verifyVendorEmail,
   resendVendorEmail,

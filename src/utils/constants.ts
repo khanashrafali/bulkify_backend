@@ -12,6 +12,7 @@ import {
   PaymentMethod,
   PriceDecisionFactor,
   AdminModule,
+  AdminProjection,
 } from "./interfaces";
 
 const USER_ROLES = [UserRole.SUPER_ADMIN, UserRole.USER, UserRole.ADMIN, UserRole.VENDOR];

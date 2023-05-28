@@ -65,6 +65,11 @@ const becameAVendor = [
     (0, express_validator_1.body)("accountNumber", "Please enter valid accountNumber").exists().trim().notEmpty(),
 ];
 const completeVendorProfile = [...becameAVendor];
+const completeVendorKyc = [
+    (0, express_validator_1.body)("gstNumber", "Please enter valid gstNumber").exists().trim().notEmpty(),
+    (0, express_validator_1.body)("panNumber", "Please eneter valid panNumber").exists().trim().notEmpty(),
+    (0, express_validator_1.body)("cinNumber", "Please enter valid cinNumber").exists().trim().notEmpty(),
+];
 const addVendor = [...becameAVendor];
 const updateVendor = [
     (0, express_validator_1.param)("vendorId", "Please enter valid vendorId").exists().isMongoId(),
@@ -137,4 +142,5 @@ exports.default = {
     updateVendorStatus,
     patchUpdateApproval,
     updateVendorProfile,
+    completeVendorKyc,
 };

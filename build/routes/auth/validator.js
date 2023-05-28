@@ -11,12 +11,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_validator_1 = require("express-validator");
 const utils_1 = require("../../utils");
+const models_1 = require("../../models");
+const interfaces_1 = require("../../utils/interfaces");
 const userLogin = [
     (0, express_validator_1.oneOf)([
         (0, express_validator_1.body)("emailOrMobile").exists().trim().notEmpty().isMobilePhone("en-IN"),
         (0, express_validator_1.body)("emailOrMobile").exists().trim().notEmpty().isEmail().normalizeEmail(),
     ], "Please enter valid mobile number or email id"),
 ];
+const checkCategory = (val, { req }) => __awaiter(void 0, void 0, void 0, function* () {
+    let category = yield models_1.categoryModel.findOne({ _id: val });
+    if (!category)
+        throw utils_1.helper.buildError("No category found with this id", 404);
+});
 const userSignup = [
     (0, express_validator_1.body)("name", "Please enter valid name")
         .exists()
@@ -35,6 +42,12 @@ const vendorSignup = [
         .trim()
         .notEmpty()
         .matches(utils_1.CONSTANT.REGX.Password),
+    (0, express_validator_1.body)('firstName', "Please enter valid first name").exists().trim().notEmpty(),
+    (0, express_validator_1.body)('lastName', "Please enter valid last name").exists().trim().notEmpty(),
+    (0, express_validator_1.body)('mobileNumber', "Please enter valid mobile number").exists().trim().notEmpty(),
+    (0, express_validator_1.body)('companyName', "Please enter valid company name").exists().trim().notEmpty(),
+    (0, express_validator_1.body)('country', "Please enter valid country").exists().trim().notEmpty(),
+    // body('categoryForBusiness', "Please select valid category").exists().trim().notEmpty().custom(checkCategory),
 ];
 const resendOtp = [
     (0, express_validator_1.oneOf)([
@@ -56,11 +69,21 @@ const adminSignup = [
         .trim()
         .notEmpty()
         .matches(utils_1.CONSTANT.REGX.Password),
+    (0, express_validator_1.body)('firstName', "Please enter valid first name").exists().trim().notEmpty(),
+    (0, express_validator_1.body)('lastName', "Please enter valid last name").exists().trim().notEmpty(),
+    (0, express_validator_1.body)('mobileNumber', "Please enter valid mobile number").exists().trim().notEmpty(),
+    (0, express_validator_1.body)("role", "Please select valid role").exists().trim().notEmpty().isIn([interfaces_1.UserRole.SUPER_ADMIN, interfaces_1.UserRole.ADMIN])
 ];
 const resendAdminEmail = [(0, express_validator_1.body)("email", "Please enter valid email").exists().trim().notEmpty().isEmail().normalizeEmail()];
-const verifyAdminEmail = [(0, express_validator_1.param)("token", "Please enter valid token").exists().trim().notEmpty()];
+const verifyAdminEmail = [
+    (0, express_validator_1.body)("token", "Please enter valid token").exists().trim().notEmpty(),
+    (0, express_validator_1.body)("email", "Please enter valid email").exists().trim().notEmpty().isEmail().normalizeEmail()
+];
 const resendVendorEmail = [(0, express_validator_1.body)("email", "Please enter valid email").exists().trim().notEmpty().isEmail().normalizeEmail()];
-const verifyVendorEmail = [(0, express_validator_1.param)("token", "Please enter valid token").exists().trim().notEmpty()];
+const verifyVendorEmail = [
+    (0, express_validator_1.body)("token", "Please enter valid token").exists().trim().notEmpty(),
+    (0, express_validator_1.body)("email", "Please enter valid email").exists().trim().notEmpty().isEmail().normalizeEmail()
+];
 const adminLogin = [
     (0, express_validator_1.body)("email", "Please enter valid email").exists().trim().notEmpty().isEmail().normalizeEmail(),
     (0, express_validator_1.body)("password", `Please enter valid password`).exists().trim().notEmpty(),

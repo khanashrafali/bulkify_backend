@@ -23,6 +23,11 @@ router.post("/complete-profile", isVendorAuth_1.isVendor, utils_1.fileHandler.up
     { name: "images", maxCount: 5 },
     { name: "video", maxCount: 1 },
 ]), validator_1.default.completeVendorProfile, controllers_1.vendorCtrl.completeVendorProfile);
+router.post("/complete-vendor-kyc", isVendorAuth_1.isVendor, utils_1.fileHandler.uploadProductFilesToS3("vendors").fields([
+    { name: "gstCertificate", maxCount: 2 },
+    { name: "panAvatar", maxCount: 2 },
+    { name: "coiAvatar", maxCount: 2 }
+]), validator_1.default.completeVendorKyc, controllers_1.vendorCtrl.completeVendorKyc);
 router.post("/", isAdminAuth_1.isAdmin, utils_1.fileHandler.uploadProductFilesToS3("vendors").fields([
     { name: "avatar", maxCount: 1 },
     // { name: "images", maxCount: 5 },

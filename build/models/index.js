@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.shipChargeModel = exports.dynamicModel = exports.notificationModel = exports.queriesModel = exports.bdProductModel = exports.adsModel = exports.brandModel = exports.wishlistModel = exports.userFeedbackModel = exports.configModel = exports.mainCategoryModel = exports.roleModel = exports.variantModel = exports.deleveryAddressModel = exports.pricesModel = exports.bankModel = exports.contentModel = exports.adminModel = exports.payoutModel = exports.subscriberModel = exports.reviewModel = exports.sliderModel = exports.addressModel = exports.couponModel = exports.orderModel = exports.cartModel = exports.collectionModel = exports.productModel = exports.vendorModel = exports.categoryModel = exports.userModel = void 0;
+exports.vendorKYCModel = exports.shipChargeModel = exports.dynamicModel = exports.notificationModel = exports.queriesModel = exports.bdProductModel = exports.adsModel = exports.brandModel = exports.wishlistModel = exports.userFeedbackModel = exports.configModel = exports.mainCategoryModel = exports.roleModel = exports.variantModel = exports.deleveryAddressModel = exports.pricesModel = exports.bankModel = exports.contentModel = exports.adminModel = exports.payoutModel = exports.subscriberModel = exports.reviewModel = exports.sliderModel = exports.addressModel = exports.couponModel = exports.orderModel = exports.cartModel = exports.collectionModel = exports.productModel = exports.vendorModel = exports.categoryModel = exports.userModel = void 0;
 const cart_model_1 = __importDefault(require("./cart.model"));
 exports.cartModel = cart_model_1.default;
 const category_model_1 = __importDefault(require("./category.model"));
@@ -66,3 +66,5 @@ const dynamic_heading_model_1 = __importDefault(require("./dynamic-heading.model
 exports.dynamicModel = dynamic_heading_model_1.default;
 const ship_charge_model_1 = __importDefault(require("./ship-charge.model"));
 exports.shipChargeModel = ship_charge_model_1.default;
+const vendorKYC_model_1 = __importDefault(require("./vendorKYC.model"));
+exports.vendorKYCModel = vendorKYC_model_1.default;

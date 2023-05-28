@@ -213,7 +213,7 @@ const resendOtp = (emailOrMobile) => __awaiter(void 0, void 0, void 0, function*
  */
 const adminLogin = (email, password) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield models_1.adminModel.findOne({ email }).populate("adminRole");
+        const user = yield models_1.userModel.findOne({ email }, interfaces_1.AdminProjection);
         // if (!user) throw helper.buildError("No admin found with this email", 404);
         if (!user)
             throw utils_1.helper.buildError("Invalid email or password.", 404);
@@ -221,6 +221,8 @@ const adminLogin = (email, password) => __awaiter(void 0, void 0, void 0, functi
         if (userToJson.role == interfaces_1.UserRole.ADMIN && !userToJson.isActive) {
             throw utils_1.helper.buildError("Your account is deactived by super admin, Kindly get in touch with Super Admin", 400);
         }
+        if (userToJson.role == interfaces_1.UserRole.ADMIN && !userToJson.isEmailVerified)
+            throw utils_1.helper.buildError('Please verify email to login successfully', 400);
         const isValidPassword = yield bcryptjs_1.default.compare(password, userToJson.password);
         if (!isValidPassword)
             throw utils_1.helper.buildError("Invalid email or password.", 400);
@@ -234,15 +236,14 @@ const adminLogin = (email, password) => __awaiter(void 0, void 0, void 0, functi
 /**
  * admin signup handler
  */
-const adminSignup = (email, password, confirmPassword) => __awaiter(void 0, void 0, void 0, function* () {
+const adminSignup = (body) => __awaiter(void 0, void 0, void 0, function* () {
     let newUser;
     try {
-        if (confirmPassword != password)
+        if ((body === null || body === void 0 ? void 0 : body.confirmPassword) != (body === null || body === void 0 ? void 0 : body.password))
             throw utils_1.helper.buildError("Password and confirm must be same", 400);
-        let superAdmin = yield models_1.adminModel.findOne({ role: interfaces_1.UserRole.SUPER_ADMIN });
-        if (superAdmin)
-            throw utils_1.helper.buildError("Super admin already exists.", 401);
-        const user = yield models_1.adminModel.findOne({ email });
+        // let superAdmin = await userModel.findOne({ email: body.email, role: body.userRole });
+        const user = yield models_1.userModel.findOne({ email: body.email });
+        // if (user) throw helper.buildError(`${body.role==UserRole.SUPER_ADMIN ? 'Super admin' : 'Admin'} already exists.`, 401);
         if (user) {
             const userToJson = user.toJSON();
             if (userToJson.isEmailVerified)
@@ -254,19 +255,19 @@ const adminSignup = (email, password, confirmPassword) => __awaiter(void 0, void
             }
         }
         // const varificationToken = randomStr.generate({ charset: "numeric", length: 4 });
-        const varificationToken = utils_1.helper.getHash();
+        const varificationToken = '4321';
         const expirationTime = (0, moment_1.default)((0, moment_1.default)()).add(5, "minutes");
-        const hashPassword = yield bcryptjs_1.default.hash(password, 12);
-        const userData = {
-            email,
-            password: hashPassword,
-            varificationToken,
-            expirationTime,
-            role: interfaces_1.UserRole.SUPER_ADMIN,
-            isActive: true,
-        };
+        const hashPassword = yield bcryptjs_1.default.hash(body.password, 12);
+        const userData = Object.assign(Object.assign({}, body), { password: hashPassword, varificationToken: body.role == interfaces_1.UserRole.ADMIN ? varificationToken : null, expirationTime: body.role == interfaces_1.UserRole.ADMIN ? expirationTime : null, 
+            // role: UserRole.SUPER_ADMIN,
+            isActive: true });
+        if (body.role == interfaces_1.UserRole.SUPER_ADMIN) {
+            userData.isApproved = interfaces_1.ApprovalStatus.APPROVED;
+            // userData.isActive = true;
+            userData.isEmailVerified = true;
+        }
         if (!user)
-            newUser = yield models_1.adminModel.create(userData);
+            newUser = yield models_1.userModel.create(userData);
         else
             newUser = yield user.set(userData).save();
         // send email
@@ -274,7 +275,7 @@ const adminSignup = (email, password, confirmPassword) => __awaiter(void 0, void
         //   userData.mobileNumber,
         //   `From ${varificationToken} Webmobril`
         // );
-        return { url: `${process.env.BASE_URL}/api/v1/auth/verify-admin-email/${varificationToken}` };
+        // return { url: `${process.env.BASE_URL}/api/v1/auth/verify-admin-email/${varificationToken}` };
     }
     catch (error) {
         if (newUser)
@@ -287,7 +288,7 @@ const adminSignup = (email, password, confirmPassword) => __awaiter(void 0, void
  */
 const vendorLogin = (email, password) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield models_1.vendorModel.findOne({ email });
+        const user = yield models_1.userModel.findOne({ email });
         if (!user)
             throw utils_1.helper.buildError("No vendor found with this email", 404);
         const userToJson = user.toJSON();
@@ -306,12 +307,12 @@ const vendorLogin = (email, password) => __awaiter(void 0, void 0, void 0, funct
 /**
  * vendor signup handler
  */
-const vendorSignup = (email, password, confirmPassword) => __awaiter(void 0, void 0, void 0, function* () {
+const vendorSignup = (body) => __awaiter(void 0, void 0, void 0, function* () {
     let newUser;
     try {
-        if (confirmPassword != password)
+        if ((body === null || body === void 0 ? void 0 : body.confirmPassword) != (body === null || body === void 0 ? void 0 : body.password))
             throw utils_1.helper.buildError("Password and confirm must be same", 400);
-        const user = yield models_1.vendorModel.findOne({ email });
+        const user = yield models_1.userModel.findOne({ email: body.email });
         if (user) {
             const userToJson = user.toJSON();
             if (userToJson.isEmailVerified)
@@ -323,18 +324,13 @@ const vendorSignup = (email, password, confirmPassword) => __awaiter(void 0, voi
             }
         }
         // const varificationToken = randomStr.generate({ charset: "numeric", length: 4 });
-        const varificationToken = utils_1.helper.getHash();
+        const varificationToken = '4321';
         const expirationTime = (0, moment_1.default)((0, moment_1.default)()).add(5, "minutes");
-        const hashPassword = yield bcryptjs_1.default.hash(password, 12);
-        const userData = {
-            email,
-            password: hashPassword,
-            varificationToken,
-            expirationTime,
-            // role: UserRole.SUPER_ADMIN,
-        };
+        const hashPassword = yield bcryptjs_1.default.hash(body.password, 12);
+        const userData = Object.assign(Object.assign({}, body), { password: hashPassword, varificationToken,
+            expirationTime, role: interfaces_1.UserRole.VENDOR });
         if (!user)
-            newUser = yield models_1.vendorModel.create(userData);
+            newUser = yield models_1.userModel.create(userData);
         else
             newUser = yield user.set(userData).save();
         // send email
@@ -342,7 +338,7 @@ const vendorSignup = (email, password, confirmPassword) => __awaiter(void 0, voi
         //   userData.mobileNumber,
         //   `From ${varificationToken} Webmobril`
         // );
-        return { url: `${process.env.BASE_URL}/api/v1/auth/verify-vendor-email/${varificationToken}` };
+        // return { url: `${process.env.BASE_URL}/api/v1/auth/verify-vendor-email/${varificationToken}` };
     }
     catch (error) {
         if (newUser)
@@ -353,17 +349,16 @@ const vendorSignup = (email, password, confirmPassword) => __awaiter(void 0, voi
 /**
  * verify admin email handler
  */
-const verifyAdminEmail = (varificationToken) => __awaiter(void 0, void 0, void 0, function* () {
+const verifyEmail = (varificationToken, email) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield models_1.adminModel.findOne({ varificationToken });
+        const user = yield models_1.userModel.findOne({ varificationToken, email });
         if (!user)
             throw utils_1.helper.buildError("Please enter valid varification token", 400);
         const userToJson = user.toJSON();
         if (userToJson.expirationTime && (0, moment_1.default)(userToJson.expirationTime).isBefore((0, moment_1.default)()))
-            throw utils_1.helper.buildError("Link expired", 400);
+            throw utils_1.helper.buildError("OTP expired", 400);
         let data = { varificationToken: null, expirationTime: null, isEmailVerified: true };
-        if (userToJson.role == interfaces_1.UserRole.SUPER_ADMIN)
-            data.isApproved = interfaces_1.ApprovalStatus.APPROVED;
+        // if (userToJson.role == UserRole.SUPER_ADMIN) data.isApproved = ApprovalStatus.APPROVED;
         yield user.set(data).save();
     }
     catch (error) {
@@ -493,10 +488,10 @@ const sendAdminForgotPasswordEmail = (emailOrMobile) => __awaiter(void 0, void 0
     try {
         const isMobile = validator_1.default.isMobilePhone(emailOrMobile, "en-IN");
         let conditions = isMobile ? { mobileNumber: emailOrMobile } : { email: emailOrMobile };
-        let user = yield models_1.adminModel.findOne(conditions);
+        let user = yield models_1.userModel.findOne(conditions);
         let msg = isMobile ? "no admin found with this Mobile number" : "no admin found with this email";
         if (!user)
-            throw utils_1.helper.buildError("no admin found with this email", 400);
+            throw utils_1.helper.buildError(msg, 400);
         const userObj = user.toJSON();
         if (userObj.expirationTime && (0, moment_1.default)(userObj.expirationTime).isAfter((0, moment_1.default)())) {
             // const url = `${process.env.BASE_URL}/admin-reset-password/${userObj.varificationToken}`;
@@ -528,7 +523,7 @@ const sendAdminForgotPasswordEmail = (emailOrMobile) => __awaiter(void 0, void 0
  */
 const resetAdminPassword = (varificationToken, newPassword, email) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let admin = yield models_1.adminModel.findOne({ varificationToken, email });
+        let admin = yield models_1.userModel.findOne({ varificationToken, email });
         if (!admin)
             throw utils_1.helper.buildError("invalid token", 400);
         let adminObj = admin.toJSON();
@@ -561,7 +556,7 @@ const sendVendorForgotPasswordEmail = (email) => __awaiter(void 0, void 0, void 
             let leftMinutes = (0, moment_1.default)(userObj.expirationTime)
                 .subtract((0, moment_1.default)().minutes(), "minutes")
                 .minutes();
-            throw utils_1.helper.buildError(`Please enter old otp sent to your mobile, or wait ${leftMinutes} min till old otp expire.`, 200);
+            throw utils_1.helper.buildError(`Please enter old otp sent to your email, or wait ${leftMinutes} min till old otp expire.`, 200);
         }
         const varificationToken = '4321';
         const expirationTime = (0, moment_1.default)().add(1, "hour");
@@ -584,7 +579,7 @@ const sendVendorForgotPasswordEmail = (email) => __awaiter(void 0, void 0, void 
  */
 const resetVendorPassword = (varificationToken, newPassword, email) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let admin = yield models_1.vendorModel.findOne({ varificationToken, email });
+        let admin = yield models_1.userModel.findOne({ varificationToken, email });
         if (!admin)
             throw utils_1.helper.buildError("invalid otp", 400);
         let adminObj = admin.toJSON();
@@ -613,7 +608,7 @@ exports.default = {
     vendorLogin,
     vendorSignup,
     verifyAuthToken,
-    verifyAdminEmail,
+    verifyEmail,
     resendAdminEmail,
     verifyVendorEmail,
     resendVendorEmail,

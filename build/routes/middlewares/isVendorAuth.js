@@ -33,7 +33,7 @@ const isVendor = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
             throw utils_1.helper.buildError(`Please add valid token prefix like ${defaultPrifix.join(",")}`, 401);
         }
         authData = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
-        let authUser = yield models_1.vendorModel.findOne({ _id: authData.id });
+        let authUser = yield models_1.userModel.findOne({ _id: authData.id });
         if (!authUser)
             throw utils_1.helper.buildError(`Unauthorize!`, 401);
         if (authUser)

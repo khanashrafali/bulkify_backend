@@ -16,6 +16,7 @@ const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const randomstring_1 = __importDefault(require("randomstring"));
 const models_1 = require("../models");
 const utils_1 = require("../utils");
+const interfaces_1 = require("../utils/interfaces");
 utils_1.helper.loadEnvFile();
 /**
  * create vender handler
@@ -122,16 +123,17 @@ const getVendors = (queryParams) => __awaiter(void 0, void 0, void 0, function* 
  */
 const getVendorsByAdmin = (queryParams) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let conditions = {};
+        let conditions = { role: interfaces_1.UserRole.VENDOR };
         let { textSearch, isProfileComplete, isActive, createdAt, isApproved } = queryParams;
         const pageInfo = utils_1.helper.checkPagination(queryParams);
         if (textSearch) {
             conditions["$or"] = [
-                { name: { $regex: utils_1.helper.regxEscape(textSearch), $options: "i" } },
+                { firstName: { $regex: utils_1.helper.regxEscape(textSearch), $options: "i" } },
+                { lastName: { $regex: utils_1.helper.regxEscape(textSearch), $options: "i" } },
                 { email: { $regex: utils_1.helper.regxEscape(textSearch), $options: "i" } },
                 { mobileNumber: { $regex: utils_1.helper.regxEscape(textSearch), $options: "i" } },
-                { businessEmail: { $regex: utils_1.helper.regxEscape(textSearch), $options: "i" } },
-                { businessName: { $regex: utils_1.helper.regxEscape(textSearch), $options: "i" } },
+                { companyName: { $regex: utils_1.helper.regxEscape(textSearch), $options: "i" } },
+                { country: { $regex: utils_1.helper.regxEscape(textSearch), $options: "i" } },
             ];
         }
         if (isProfileComplete)
@@ -143,8 +145,8 @@ const getVendorsByAdmin = (queryParams) => __awaiter(void 0, void 0, void 0, fun
         if (isApproved)
             conditions.isApproved = isApproved;
         let docs = [];
-        let mongoQuery = models_1.vendorModel.find(conditions).sort({ createdAt: -1 });
-        const count = yield models_1.vendorModel.countDocuments(conditions);
+        let mongoQuery = models_1.userModel.find(conditions).sort({ createdAt: -1 });
+        const count = yield models_1.userModel.countDocuments(conditions);
         if (pageInfo)
             docs = yield mongoQuery.skip(pageInfo.skip).limit(pageInfo.pageSize);
         else
@@ -178,6 +180,24 @@ const updateVendorApproval = (vendorId, isApproved) => __awaiter(void 0, void 0,
         if (!vendor)
             throw utils_1.helper.buildError("No vendor found with this id", 404);
         yield vendor.set({ isApproved }).save();
+    }
+    catch (error) {
+        throw error;
+    }
+});
+/**
+ * complete vendor KYC
+ */
+const completeVendorKyc = (req, body, fileObj, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let gstCertificate = fileObj.gstCertificate.map((f) => f.Location);
+        let panAvatar = fileObj.panAvatar.map((f) => f.Location);
+        let coiAvatar = fileObj.coiAvatar.map((f) => f.Location);
+        let kycData = Object.assign(Object.assign({}, body), { gstCertificate,
+            panAvatar,
+            coiAvatar, vendor: req.user._id });
+        yield models_1.vendorKYCModel.create(kycData);
+        yield req.user.set({ isVendorKycComplete: true }).save();
     }
     catch (error) {
         throw error;
@@ -267,4 +287,5 @@ exports.default = {
     updateVendorApproval,
     becameAVendor,
     generateNewPassword,
+    completeVendorKyc,
 };

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { vendorModel } from "../../models";
+import { userModel, vendorModel } from "../../models";
 import { helper } from "../../utils";
 import { UserRole } from "../../utils/interfaces";
 
@@ -24,7 +24,7 @@ const isVendor = async (req: Request, res: Response, next: NextFunction) => {
 
     authData = jwt.verify(token, process.env.JWT_SECRET as string);
 
-    let authUser = await vendorModel.findOne({ _id: authData.id });
+    let authUser = await userModel.findOne({ _id: authData.id });
 
     if (!authUser) throw helper.buildError(`Unauthorize!`, 401);
 

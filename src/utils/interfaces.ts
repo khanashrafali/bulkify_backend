@@ -12,6 +12,18 @@ export enum UserRole {
   VENDOR = "VENDOR",
 }
 
+export enum AdminProjection {
+  _id = 1,
+  firstName = 1,
+  lastName = 1,
+  email = 1,
+  mobileNumber = 1,
+  avatar = 1,
+  isActive = 1,
+  userRole = 1,
+  isEmailVerified = 1
+}
+
 export enum ApprovalStatus {
   PENDING = "PENDING",
   APPROVED = "APPROVED",

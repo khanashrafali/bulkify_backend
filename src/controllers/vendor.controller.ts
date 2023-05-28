@@ -121,6 +121,21 @@ const patchUpdateApproval = async (req: Request, res: Response, next: NextFuncti
 };
 
 /**
+ * complete vendor KYC
+ */
+const completeVendorKyc = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    helper.handlePayloadError(req);
+    helper.checkPayloadFiles(req);
+    const fileObj: any = req.files;
+    const result = await vendorService.completeVendorKyc(req as IRequest, req.body, fileObj, res);
+    helper.buildResponse(res, 'KYC completed successfully', result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * complete vendor profile api
  */
 const completeVendorProfile = async (req: Request, res: Response, next: NextFunction) => {
@@ -168,4 +183,5 @@ export default {
   becameAVendor,
   updateVendorProfile,
   generateNewPassword,
+  completeVendorKyc,
 };

@@ -104,7 +104,7 @@ const adminLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
 const adminSignup = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         utils_1.helper.handlePayloadError(req);
-        let result = yield services_1.authService.adminSignup(req.body.email, req.body.password, req.body.confirmPassword);
+        let result = yield services_1.authService.adminSignup(req.body);
         utils_1.helper.buildResponse(res, "Please verify email to registered successfully", result);
     }
     catch (error) {
@@ -117,7 +117,7 @@ const adminSignup = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
 const verifyAdminEmail = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         utils_1.helper.handlePayloadError(req);
-        let result = yield services_1.authService.verifyAdminEmail(req.params.token);
+        let result = yield services_1.authService.verifyEmail(req.body.token, req.body.email);
         utils_1.helper.buildResponse(res, "Email Verified Successfully!", result);
     }
     catch (error) {
@@ -168,7 +168,7 @@ const vendorLogin = (req, res, next) => __awaiter(void 0, void 0, void 0, functi
 const vendorSignup = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         utils_1.helper.handlePayloadError(req);
-        let result = yield services_1.authService.vendorSignup(req.body.email, req.body.password, req.body.confirmPassword);
+        let result = yield services_1.authService.vendorSignup(req.body);
         utils_1.helper.buildResponse(res, "Please verify email to registered successfully", result);
     }
     catch (error) {
@@ -181,7 +181,7 @@ const vendorSignup = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
 const verifyVendorEmail = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         utils_1.helper.handlePayloadError(req);
-        let result = yield services_1.authService.verifyVendorEmail(req.params.token);
+        let result = yield services_1.authService.verifyEmail(req.body.token, req.body.email);
         utils_1.helper.buildResponse(res, "Email Verified Successfully!", result);
     }
     catch (error) {
